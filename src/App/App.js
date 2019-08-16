@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDom from 'react-dom';
 import { Route, Link, withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import NoteContext from '../NoteContext.js';
@@ -18,51 +19,33 @@ class App extends Component {
     folders: [],
     err: null
   };
-  FolderUrl = 'http://localhost:9090/folders';
-  NoteUrl = 'http://localhost:9090/notes';
+  FolderUrl = `http://localhost:9090/folders`;
+  NoteUrl = `http://localhost:9090/notes`;
 
   componentDidMount() {
-    fetch(this.FolderUrl)
-      .then(res => {
-        if (!res.ok) {
-          throw new Error('Something went wrong, please try again later.');
-        }
-        return res;
+    Promise.all([
+      fetch(this.FolderUrl),
+      fetch(this.NoteUrl)
+    ])
+      .then(([notesRes, foldersRes]) => {
+        if (!notesRes.ok) 
+          throw new Error('Something went wrong, please try again later.')
+        if (!foldersRes.ok) 
+          throw new Error('Something went wrong, please try again later.')
+        
+          return Promise.all([notesRes.json(), foldersRes.json()]); 
       })
-      .then(res => res.json())
-      .then(data => {
-        this.setState({
-          folders: data,
-          error: null
-        });
+      .then(([notes,folders]) => {
+        this.setState({notes, folders});
       })
+
       .catch(err => {
         this.setState({
-          error: err.message
+          err: err.message
         });
         console.log(err);
       });
-
-    fetch(this.NoteUrl)
-      .then(res => {
-        if (!res.ok) {
-          throw new Error('Something went wrong, please try again later.');
-        }
-        return res;
-      })
-      .then(res => res.json())
-      .then(data => {
-        this.setState({
-          notes: data,
-          error: null
-        });
-      })
-      .catch(err => {
-        this.setState({
-          error: err.message
-        });
-      });
-  }
+}
 
   handleDeleteNote = id => {
     const newNotes = this.state.notes.filter(note => note.id !== id);

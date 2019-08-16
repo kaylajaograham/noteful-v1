@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import NotefulForm from '../NotefulForm/NotefulForm';
 import './AddFolder.css';
 import NoteContext from '../NoteContext';
-import PropTypes from 'prop-types';
 
 export default class AddFolder extends Component {
   constructor() {
